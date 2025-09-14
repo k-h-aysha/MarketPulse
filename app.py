@@ -23,6 +23,129 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# Custom CSS for enhanced UI
+st.markdown("""
+<style>
+/* Force sidebar to be visible and expanded */
+section[data-testid="stSidebar"] {
+    background: #f8f9fa !important;
+    border-right: 1px solid #e0e0e0 !important;
+    width: 280px !important;
+    min-width: 280px !important;
+    max-width: 280px !important;
+    position: relative !important;
+    transform: none !important;
+    transition: none !important;
+}
+
+section[data-testid="stSidebar"] > div {
+    background: #f8f9fa !important;
+    width: 280px !important;
+    min-width: 280px !important;
+    max-width: 280px !important;
+}
+
+/* Hide ALL default Streamlit navigation elements */
+section[data-testid="stSidebar"] .css-1d391kg,
+section[data-testid="stSidebar"] .css-1lcbmhc,
+section[data-testid="stSidebar"] .css-1y4p8pa,
+section[data-testid="stSidebar"] .css-12oz5g7,
+section[data-testid="stSidebar"] nav,
+section[data-testid="stSidebar"] ul,
+section[data-testid="stSidebar"] li[role="tab"],
+section[data-testid="stSidebar"] button[role="tab"],
+section[data-testid="stSidebar"] .stSelectbox,
+section[data-testid="stSidebar"] .css-2trqyj,
+section[data-testid="stSidebar"] .css-1n76uvr,
+section[data-testid="stSidebar"] div[data-testid="stSidebarNav"] {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    overflow: hidden !important;
+}
+
+/* Sidebar logo styling */
+.sidebar-logo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem 0;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid #e0e0e0;
+    background: #f8f9fa;
+}
+
+.sidebar-logo svg {
+    max-width: 120px;
+    height: auto;
+    display: block !important;
+}
+
+/* Navigation items styling */
+.nav-item {
+    margin: 0.5rem 0;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    background: white;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    color: #000000 !important;
+    font-weight: 500;
+    display: block !important;
+    visibility: visible !important;
+}
+
+.nav-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    border-color: #1f77b4;
+    background: #f8f9fa;
+}
+
+.nav-item.active {
+    background: #1f77b4 !important;
+    color: white !important;
+    border-color: #1f77b4;
+    box-shadow: 0 4px 12px rgba(31,119,180,0.3);
+}
+
+.nav-item.active strong {
+    color: white !important;
+}
+
+.nav-item.active small {
+    color: rgba(255,255,255,0.8) !important;
+}
+
+.nav-item strong {
+    color: #000000 !important;
+    font-size: 1rem;
+}
+
+.nav-item small {
+    color: #666666 !important;
+    font-size: 0.85rem;
+}
+
+/* Main content adjustment */
+.main .block-container {
+    padding-top: 5rem;
+    margin-left: 0;
+}
+
+/* Ensure sidebar toggle button works */
+.css-1rs6os {
+    display: block !important;
+}
+
+/* Make sure sidebar content is visible */
+.css-1d391kg {
+    padding-top: 1rem !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
 @st.cache_data
 def load_and_process_data():
     """Load and process all data using modular components"""
@@ -74,19 +197,306 @@ def display_performance_alerts(analytics):
 def main():
     """Enhanced main dashboard application"""
     
-    # Header with enhanced styling
+    # Initialize session state for page navigation
+    if 'current_page' not in st.session_state:
+        st.session_state.current_page = 'Home'
+    
+    # Sidebar with logo and navigation
+    with st.sidebar:
+        # Custom CSS for sidebar styling and header removal
+        st.markdown("""
+        <style>
+        /* Hide the sidebar header completely */
+        [data-testid="stSidebarHeader"] {
+            display: none !important;
+        }
+        
+        /* Hide sidebar close button and collapse elements */
+        [data-testid="stSidebarCollapseButton"],
+        [data-testid="stSidebarCloseButton"],
+        .css-1544g2n,
+        .st-emotion-cache-1544g2n {
+            display: none !important;
+        }
+        
+        /* Remove top padding from sidebar content */
+        .css-1d391kg, .st-emotion-cache-1d391kg {
+            padding-top: 0.5rem !important;
+        }
+        
+        /* Reduce main content top padding */
+        .main .block-container {
+            padding-top: 1rem !important;
+        }
+        
+        /* Logo styling at absolute top */
+        .sidebar-logo {
+            text-align: center;
+            padding: 1.5rem 0;
+            border-bottom: 1px solid #e0e0e0;
+            margin-bottom: 1rem;
+            margin-top: 0 !important;
+            position: relative;
+            top: 0;
+        }
+        .sidebar-logo svg {
+            max-width: 100%;
+            height: auto;
+        }
+        
+        /* Ensure sidebar content starts from top */
+        .css-1cypcdb, .st-emotion-cache-1cypcdb {
+            padding-top: 0 !important;
+        }
+        
+        /* Enhanced button styling with hover and active states */
+        .stButton > button {
+            width: 100%;
+            border-radius: 8px !important;
+            border: 1px solid #d0d0d0 !important;
+            transition: all 0.3s ease !important;
+            font-weight: 500 !important;
+            padding: 0.75rem 1rem !important;
+            background-color: #f8f9fa !important;
+        }
+        
+        /* Home button selected state - using key attribute */
+        .stButton button[data-testid="baseButton-secondary"]:has-text("🏠 Home") {
+            background-color: #3366FF !important;
+            color: white !important;
+            border-color: #3366FF !important;
+        }
+        
+        /* Selected button styling - only for active page */
+        button.page-selected {
+            background-color: #3366FF !important;
+            color: white !important;
+            border-color: #3366FF !important;
+        }
+        
+        /* Override hover for selected button */
+        button.page-selected:hover {
+            background-color: #2952CC !important;
+            color: white !important;
+        }
+        
+        /* Hover animation */
+        .stButton > button:hover {
+            background-color: #e3f2fd !important;
+            border-color: #3366FF !important;
+            transform: translateY(-2px) !important;
+            box-shadow: 0 4px 12px rgba(51, 102, 255, 0.2) !important;
+        }
+        
+        /* Active/Selected button styling */
+        .stButton > button:focus {
+            background-color: #3366FF !important;
+            color: white !important;
+            border-color: #3366FF !important;
+            box-shadow: 0 0 0 2px rgba(51, 102, 255, 0.3) !important;
+        }
+        
+        /* Button press animation */
+        .stButton > button:active {
+            transform: translateY(0px) !important;
+        }
+        
+        /* Reduce heading sizes */
+        h1 {
+            font-size: 2rem !important;
+        }
+        h2 {
+            font-size: 1.5rem !important;
+        }
+        h3 {
+            font-size: 1.25rem !important;
+        }
+        
+        /* Scroll to top on page load */
+        html {
+            scroll-behavior: smooth;
+        }
+        </style>
+        """, unsafe_allow_html=True)
+        
+        # Hide default Streamlit elements
+        st.markdown("""
+        <script>
+        setTimeout(() => {
+            const nav = document.querySelector('[data-testid="stSidebarNav"]');
+            if (nav) nav.remove();
+            const selectboxes = document.querySelectorAll('.stSelectbox');
+            selectboxes.forEach(box => box.remove());
+            
+            // Hide sidebar header and close button
+            const sidebarHeader = document.querySelector('[data-testid="stSidebarHeader"]');
+            if (sidebarHeader) sidebarHeader.style.display = 'none';
+            
+            // Hide all sidebar close/collapse elements
+            const collapseButton = document.querySelector('[data-testid="stSidebarCollapseButton"]');
+            if (collapseButton) collapseButton.style.display = 'none';
+            
+            const closeButton = document.querySelector('[data-testid="stSidebarCloseButton"]');
+            if (closeButton) closeButton.style.display = 'none';
+            
+            // Hide any collapse icons
+            const collapseIcons = document.querySelectorAll('.css-1544g2n, .st-emotion-cache-1544g2n');
+            collapseIcons.forEach(icon => icon.style.display = 'none');
+            
+            // Remove top padding from sidebar
+            const sidebarContent = document.querySelector('[data-testid="stSidebar"] > div');
+            if (sidebarContent) sidebarContent.style.paddingTop = '0.5rem';
+            
+            // Enhanced scroll to top functionality
+            window.scrollTo({top: 0, left: 0, behavior: 'instant'});
+            document.documentElement.scrollTop = 0;
+            document.body.scrollTop = 0;
+            
+            // Enhanced button selection management
+            setTimeout(() => {
+                // Clear all previous selections
+                const allButtons = document.querySelectorAll('[data-testid="stSidebar"] button');
+                allButtons.forEach(btn => {
+                    btn.classList.remove('page-selected');
+                    btn.style.removeProperty('background-color');
+                    btn.style.removeProperty('color');
+                    btn.style.removeProperty('border-color');
+                });
+                
+                // Set current page button as selected
+                const currentPage = sessionStorage.getItem('currentPage') || 'Home';
+                const buttons = document.querySelectorAll('[data-testid="stSidebar"] button');
+                buttons.forEach(btn => {
+                    const btnText = btn.textContent.trim();
+                    if ((currentPage === 'Home' && btnText.includes('🏠 Home')) ||
+                        (currentPage === 'Overview' && btnText.includes('📊 Overview')) ||
+                        (currentPage === 'Channel Analysis' && btnText.includes('📺 Channel Analysis')) ||
+                        (currentPage === 'Business Impact' && btnText.includes('💼 Business Impact')) ||
+                        (currentPage === 'Business Intelligence' && btnText.includes('🧠 Business Intelligence'))) {
+                        btn.classList.add('page-selected');
+                        btn.style.setProperty('background-color', '#3366FF', 'important');
+                        btn.style.setProperty('color', 'white', 'important');
+                        btn.style.setProperty('border-color', '#3366FF', 'important');
+                    }
+                });
+                
+                // Force scroll to top
+                document.documentElement.scrollTop = 0;
+                document.body.scrollTop = 0;
+                window.pageYOffset = 0;
+            }, 200);
+        }, 100);
+        </script>
+        """, unsafe_allow_html=True)
+        
+        # Logo at the top of sidebar - Fully visible and properly sized
+        st.markdown("""
+        <div class="sidebar-logo" style="text-align: center; padding: 0.75rem 0.1rem; overflow: visible;">
+            <svg width="260" height="80" viewBox="0 0 260 80" xmlns="http://www.w3.org/2000/svg">
+                <polygon points="12,60 30,18 48,60" fill="#3366FF"/>
+                <circle cx="30" cy="18" r="10" fill="#3366FF"/>
+                <text x="60" y="45" font-family="Arial,sans-serif" font-size="26" font-weight="bold" fill="#333">MARKETPULSE</text>
+            </svg>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Navigation items with enhanced functionality
+        if st.button("🏠 Home", key="home_btn", use_container_width=True):
+            st.session_state.current_page = 'Home'
+            st.markdown("""
+            <script>
+                sessionStorage.setItem('currentPage', 'Home');
+                setTimeout(() => {
+                    window.scrollTo({top: 0, behavior: 'instant'});
+                    document.documentElement.scrollTop = 0;
+                    document.body.scrollTop = 0;
+                }, 100);
+            </script>
+            """, unsafe_allow_html=True)
+            st.rerun()
+            
+        if st.button("📊 Overview", key="overview_btn", use_container_width=True):
+            st.session_state.current_page = 'Overview'
+            st.markdown("""
+            <script>
+                sessionStorage.setItem('currentPage', 'Overview');
+                setTimeout(() => {
+                    window.scrollTo({top: 0, behavior: 'instant'});
+                    document.documentElement.scrollTop = 0;
+                    document.body.scrollTop = 0;
+                }, 100);
+            </script>
+            """, unsafe_allow_html=True)
+            st.rerun()
+            
+        if st.button("📺 Channel Analysis", key="channel_btn", use_container_width=True):
+            st.session_state.current_page = 'Channel Analysis'
+            st.markdown("""
+            <script>
+                sessionStorage.setItem('currentPage', 'Channel Analysis');
+                setTimeout(() => {
+                    window.scrollTo({top: 0, behavior: 'instant'});
+                    document.documentElement.scrollTop = 0;
+                    document.body.scrollTop = 0;
+                }, 100);
+            </script>
+            """, unsafe_allow_html=True)
+            st.rerun()
+            
+        if st.button("💼 Business Impact", key="impact_btn", use_container_width=True):
+            st.session_state.current_page = 'Business Impact'
+            st.markdown("""
+            <script>
+                sessionStorage.setItem('currentPage', 'Business Impact');
+                setTimeout(() => {
+                    window.scrollTo({top: 0, behavior: 'instant'});
+                    document.documentElement.scrollTop = 0;
+                    document.body.scrollTop = 0;
+                }, 100);
+            </script>
+            """, unsafe_allow_html=True)
+            st.rerun()
+            
+        if st.button("🧠 Business Intelligence", key="bi_btn", use_container_width=True):
+            st.session_state.current_page = 'Business Intelligence'
+            st.markdown("""
+            <script>
+                sessionStorage.setItem('currentPage', 'Business Intelligence');
+                setTimeout(() => {
+                    window.scrollTo({top: 0, behavior: 'instant'});
+                    document.documentElement.scrollTop = 0;
+                    document.body.scrollTop = 0;
+                }, 100);
+            </script>
+            """, unsafe_allow_html=True)
+            st.rerun()
+
+    # Route to different pages based on selection
+    if st.session_state.current_page == 'Home':
+        show_home_page()
+    elif st.session_state.current_page == 'Overview':
+        show_overview_page()
+    elif st.session_state.current_page == 'Channel Analysis':
+        show_channel_analysis_page()
+    elif st.session_state.current_page == 'Business Impact':
+        show_business_impact_page()
+    elif st.session_state.current_page == 'Business Intelligence':
+        show_business_intelligence_page()
+
+def show_home_page():
+    """Display the main dashboard home page"""
+    # Main content header with enhanced styling
     st.markdown("""
-    <div style="text-align: center; padding: 2rem 0;">
-        <h1 style="color: #1f77b4; margin-bottom: 0;">📊 MarketPulse Dashboard</h1>
-        <p style="font-size: 1.2rem; color: #6c757d; margin-top: 0.5rem;">
+    <div style="text-align: center; padding: 2rem 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px; margin-bottom: 2rem;">
+        <h1 style="color: white; margin: 0; font-size: 2.5rem;">🚀 MarketPulse Dashboard</h1>
+        <p style="font-size: 1.2rem; color: #f8f9fa; margin-top: 0.5rem;">
             Marketing Intelligence & Business Performance Analytics
         </p>
     </div>
     """, unsafe_allow_html=True)
     
     # Load and process data
-    with st.spinner("🔄 Loading and processing data..."):
-        processed_data, error = load_and_process_data()
+    processed_data, error = load_and_process_data()
     
     if error:
         st.error(f"❌ Error: {error}")
@@ -101,84 +511,44 @@ def main():
     # Store in session state for other pages
     st.session_state.processed_data = processed_data
     
-    # Sidebar with enhanced controls
-    st.sidebar.header("🎯 Dashboard Controls")
-    st.sidebar.markdown("---")
+    # Display main dashboard content
+    display_main_dashboard(processed_data)
+
+def show_home_page():
+    """Display the main dashboard home page"""
+    # Main content header with enhanced styling
+    st.markdown("""
+    <div style="text-align: center; padding: 2rem 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px; margin-bottom: 2rem;">
+        <h1 style="color: white; margin: 0; font-size: 2rem;">🚀 MarketPulse Dashboard</h1>
+        <p style="font-size: 1.1rem; color: #f8f9fa; margin-top: 0.5rem;">
+            Marketing Intelligence & Business Performance Analytics
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
     
-    # Date range filter
-    st.sidebar.subheader("📅 Time Period Analysis")
+    # Load and process data
+    processed_data, error = load_and_process_data()
     
-    # Get date range from data
-    all_dates = processed_data['final_dataset']['date'].dt.date
-    min_date = all_dates.min()
-    max_date = all_dates.max()
+    if error:
+        st.error(f"❌ Error: {error}")
+        st.info("📋 Please ensure all CSV files are in the `data/` folder:")
+        st.code("- Facebook.csv\n- Google.csv\n- TikTok.csv\n- Business.csv")
+        return
     
-    # Quick date range options
-    date_option = st.sidebar.selectbox(
-        "Quick Select",
-        ["Custom Range", "Last 7 Days", "Last 14 Days", "Last 30 Days", "All Time"]
-    )
+    if not processed_data:
+        st.error("❌ Failed to load and process data")
+        return
     
-    if date_option == "Last 7 Days":
-        start_date = max_date - timedelta(days=7)
-        end_date = max_date
-    elif date_option == "Last 14 Days":
-        start_date = max_date - timedelta(days=14)
-        end_date = max_date
-    elif date_option == "Last 30 Days":
-        start_date = max_date - timedelta(days=30)
-        end_date = max_date
-    elif date_option == "All Time":
-        start_date = min_date
-        end_date = max_date
-    else:  # Custom Range
-        start_date = st.sidebar.date_input("Start Date", value=min_date, min_value=min_date, max_value=max_date)
-        end_date = st.sidebar.date_input("End Date", value=max_date, min_value=min_date, max_value=max_date)
+    # Store in session state for other pages
+    st.session_state.processed_data = processed_data
     
-    # Channel filter
-    st.sidebar.subheader("📺 Channel Focus")
-    available_channels = ['All Channels'] + list(processed_data['marketing_daily']['channel'].unique())
-    available_channels = [ch for ch in available_channels if ch != 'Total']  # Remove 'Total' from options
-    
-    selected_channels = st.sidebar.multiselect(
-        "Select Channels",
-        available_channels,
-        default=['All Channels']
-    )
-    
-    # Comparison mode
-    st.sidebar.subheader("📊 Analysis Mode")
-    comparison_mode = st.sidebar.radio(
-        "View Type",
-        ["Current Period", "Period Comparison", "Trend Analysis"]
-    )
-    
-    if comparison_mode == "Period Comparison":
-        st.sidebar.write("**Compare with:**")
-        comparison_period = st.sidebar.selectbox(
-            "Previous Period",
-            ["Previous Period (Same Length)", "Month Ago", "Quarter Ago"]
-        )
-    
-    st.sidebar.markdown("---")
-    
-    # Filter data based on selections
-    filtered_final_data = filter_data_by_date_range(processed_data['final_dataset'], start_date, end_date)
-    filtered_marketing_data = filter_data_by_date_range(processed_data['marketing_daily'], start_date, end_date)
-    
-    # Apply channel filter
-    if 'All Channels' not in selected_channels and selected_channels:
-        filtered_final_data = filtered_final_data[
-            (filtered_final_data['channel'].isin(selected_channels)) | 
-            (filtered_final_data['channel'] == 'Total')
-        ]
-        filtered_marketing_data = filtered_marketing_data[
-            (filtered_marketing_data['channel'].isin(selected_channels)) |
-            (filtered_marketing_data['channel'] == 'Total')
-        ]
-    
-    # Initialize analytics with filtered data
-    analytics = MarketingAnalytics(filtered_final_data)
+    # Display main dashboard content
+    display_main_dashboard(processed_data)
+
+def display_main_dashboard(processed_data):
+    """Display the main dashboard content"""
+    # Initialize analytics
+    analytics = MarketingAnalytics(processed_data['final_dataset'])
     
     # Display performance alerts
     display_performance_alerts(analytics)
@@ -188,13 +558,12 @@ def main():
     channel_performance = analytics.calculate_channel_performance()
     daily_trends = analytics.calculate_daily_trends()
     
-    # Success message with period info
-    period_text = f"{start_date} to {end_date}"
-    st.success(f"🎉 Data loaded successfully | Analyzing: {period_text} ({len(daily_trends)} days)")
+    # Success message
+    st.success(f"🎉 Data loaded successfully | {len(daily_trends)} days analyzed")
     
     st.markdown("---")
     
-    # Enhanced KPI Cards with comparison
+    # Enhanced KPI Cards
     st.header("📊 Key Performance Indicators")
     
     col1, col2, col3, col4 = st.columns(4)
@@ -232,220 +601,58 @@ def main():
             f"${daily_avg:,.0f}",
             delta=f"{business_metrics['data_period_days']} days analyzed"
         )
-    
-    st.markdown("---")
-    
-    # Enhanced Channel Performance with insights
-    st.header("🎯 Channel Performance Matrix")
-    
-    if not channel_performance.empty:
-        # Channel performance cards with enhanced styling
-        cols = st.columns(len(channel_performance))
-        
-        for idx, (_, row) in enumerate(channel_performance.iterrows()):
-            with cols[idx]:
-                # Performance grade based on ROAS
-                if row['roas'] > 4:
-                    grade, color = "A+", "🟢"
-                elif row['roas'] > 3:
-                    grade, color = "A", "🟡"  
-                elif row['roas'] > 2:
-                    grade, color = "B", "🟠"
-                else:
-                    grade, color = "C", "🔴"
-                
-                st.markdown(f"""
-                <div style="
-                    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-                    padding: 1rem;
-                    border-radius: 8px;
-                    border: 1px solid #dee2e6;
-                    text-align: center;
-                    margin-bottom: 1rem;
-                ">
-                    <h4 style="margin: 0 0 0.5rem 0; color: #495057;">{row['channel']}</h4>
-                    <div style="font-size: 1.5rem; font-weight: bold; color: #28a745; margin: 0.5rem 0;">
-                        {row['roas']:.2f}x ROAS
-                    </div>
-                    <div style="color: #6c757d; font-size: 0.9rem;">
-                        CTR: {row['ctr']*100:.2f}% | Grade: {color} {grade}
-                    </div>
-                    <div style="color: #6c757d; font-size: 0.85rem; margin-top: 0.5rem;">
-                        ${row['spend']:,.0f} spend
-                    </div>
-                </div>
-                """, unsafe_allow_html=True)
-    
-    # Enhanced performance table
-    st.subheader("📊 Detailed Channel Metrics")
-    if not channel_performance.empty:
-        st.dataframe(
-            channel_performance,
-            column_config={
-                "channel": st.column_config.TextColumn("Channel", width="medium"),
-                "spend": st.column_config.NumberColumn("Spend ($)", format="$%.0f", width="medium"),
-                "revenue": st.column_config.NumberColumn("Revenue ($)", format="$%.0f", width="medium"),
-                "impressions": st.column_config.NumberColumn("Impressions", format="%.0f", width="medium"),
-                "clicks": st.column_config.NumberColumn("Clicks", format="%.0f", width="small"),
-                "roas": st.column_config.NumberColumn("ROAS", format="%.2fx", width="small"),
-                "ctr": st.column_config.NumberColumn("CTR", format="%.3f%%", width="small"),
-                "cpc": st.column_config.NumberColumn("CPC ($)", format="$%.2f", width="small"),
-                "cpm": st.column_config.NumberColumn("CPM ($)", format="$%.2f", width="small")
-            },
-            use_container_width=True,
-            hide_index=True
-        )
-    
-    st.markdown("---")
-    
-    # Enhanced visualization section
-    st.header("📈 Performance Visualizations")
-    
-    tab1, tab2, tab3 = st.tabs(["📊 Channel Analysis", "📈 Trend Analysis", "🎯 Efficiency Matrix"])
-    
-    with tab1:
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            if not channel_performance.empty:
-                fig1 = px.bar(
-                    channel_performance,
-                    x='channel',
-                    y='spend',
-                    title='Marketing Investment by Channel',
-                    color='roas',
-                    color_continuous_scale='RdYlGn',
-                    text='spend'
-                )
-                fig1.update_traces(texttemplate='$%{text:,.0f}', textposition='outside')
-                fig1.update_layout(showlegend=False, height=400)
-                st.plotly_chart(fig1, use_container_width=True)
-        
-        with col2:
-            if not channel_performance.empty:
-                fig2 = px.scatter(
-                    channel_performance,
-                    x='spend',
-                    y='revenue',
-                    size='clicks',
-                    color='channel',
-                    title='ROI Efficiency: Spend vs Revenue',
-                    hover_data=['roas', 'ctr']
-                )
-                fig2.update_layout(height=400)
-                st.plotly_chart(fig2, use_container_width=True)
-    
-    with tab2:
-        if not daily_trends.empty:
-            # Trend analysis charts
-            fig3 = go.Figure()
-            
-            fig3.add_trace(go.Scatter(
-                x=daily_trends['date'],
-                y=daily_trends['spend'],
-                mode='lines+markers',
-                name='Daily Spend',
-                line=dict(color='#1f77b4', width=2),
-                yaxis='y'
-            ))
-            
-            fig3.add_trace(go.Scatter(
-                x=daily_trends['date'],
-                y=daily_trends['revenue'],
-                mode='lines+markers',
-                name='Daily Revenue',
-                line=dict(color='#2ca02c', width=2),
-                yaxis='y2'
-            ))
-            
-            fig3.update_layout(
-                title='Spend vs Revenue Trend Analysis',
-                xaxis_title='Date',
-                yaxis=dict(title='Spend ($)', side='left'),
-                yaxis2=dict(title='Revenue ($)', side='right', overlaying='y'),
-                hovermode='x unified',
-                height=400
-            )
-            
-            st.plotly_chart(fig3, use_container_width=True)
-            
-            # ROAS trend
-            fig4 = px.line(
-                daily_trends,
-                x='date',
-                y='roas',
-                title='ROAS Performance Trend',
-                line_shape='spline'
-            )
-            
-            # Add average line
-            avg_roas = daily_trends['roas'].mean()
-            fig4.add_hline(y=avg_roas, line_dash="dash", 
-                          annotation_text=f"Average: {avg_roas:.2f}x")
-            fig4.update_layout(height=400)
-            
-            st.plotly_chart(fig4, use_container_width=True)
-    
-    with tab3:
-        if not channel_performance.empty:
-            # Efficiency matrix
-            fig5 = px.scatter(
-                channel_performance,
-                x='cpc',
-                y='roas',
-                size='spend',
-                color='ctr',
-                title='Marketing Efficiency Matrix',
-                labels={'cpc': 'Cost Per Click ($)', 'roas': 'Return on Ad Spend', 'ctr': 'CTR'},
-                hover_data=['channel', 'spend', 'revenue']
-            )
-            
-            # Add quadrant lines
-            avg_cpc = channel_performance['cpc'].median()
-            avg_roas = channel_performance['roas'].median()
-            
-            fig5.add_hline(y=avg_roas, line_dash="dash", line_color="gray", opacity=0.5)
-            fig5.add_vline(x=avg_cpc, line_dash="dash", line_color="gray", opacity=0.5)
-            
-            # Add quadrant annotations
-            fig5.add_annotation(x=avg_cpc*0.5, y=avg_roas*1.5, text="High ROAS<br>Low CPC", 
-                               bgcolor="lightgreen", opacity=0.7)
-            fig5.add_annotation(x=avg_cpc*1.5, y=avg_roas*0.5, text="Low ROAS<br>High CPC", 
-                               bgcolor="lightcoral", opacity=0.7)
-            
-            fig5.update_layout(height=500)
-            st.plotly_chart(fig5, use_container_width=True)
-    
-    st.markdown("---")
-    
-    # Footer with insights
-    st.header("💡 Quick Insights")
-    insights = analytics.get_performance_insights()
-    
-    if insights:
-        insight_cols = st.columns(len(insights[:3]))
-        for i, insight in enumerate(insights[:3]):
-            with insight_cols[i]:
-                priority_color = "#dc3545" if insight['priority'] == 'High' else "#ffc107" if insight['priority'] == 'Medium' else "#28a745"
-                st.markdown(f"""
-                <div style="
-                    border: 1px solid {priority_color};
-                    border-radius: 8px;
-                    padding: 1rem;
-                    background: rgba(255,255,255,0.9);
-                ">
-                    <strong style="color: {priority_color};">{insight['type']}</strong><br>
-                    <small>{insight['insight'][:100]}...</small>
-                </div>
-                """, unsafe_allow_html=True)
-    
-    st.markdown("---")
-    st.markdown("""
-    <div style="text-align: center; color: #6c757d; padding: 1rem;">
-        <em>Built with ❤️ using Streamlit & Plotly | MarketPulse Dashboard v2.0</em><br>
-        <small>Navigate to other pages for detailed analysis →</small>
-    </div>
-    """, unsafe_allow_html=True)
+
+def show_overview_page():
+    """Load and display the Overview page"""
+    try:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("overview", os.path.join(current_dir, "pages", "1_Overview.py"))
+        overview_module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(overview_module)
+    except Exception as e:
+        st.error(f"Error loading Overview page: {e}")
+        st.info("Displaying basic overview instead...")
+        st.header("📊 Overview")
+        st.write("Overview page content would be displayed here.")
+
+def show_channel_analysis_page():
+    """Load and display the Channel Analysis page"""
+    try:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("channel_analysis", os.path.join(current_dir, "pages", "2_Channel_Analysis.py"))
+        channel_module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(channel_module)
+    except Exception as e:
+        st.error(f"Error loading Channel Analysis page: {e}")
+        st.info("Displaying basic channel analysis instead...")
+        st.header("📺 Channel Analysis")
+        st.write("Channel Analysis page content would be displayed here.")
+
+def show_business_impact_page():
+    """Load and display the Business Impact page"""
+    try:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("business_impact", os.path.join(current_dir, "pages", "3_Business_Impact.py"))
+        business_module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(business_module)
+    except Exception as e:
+        st.error(f"Error loading Business Impact page: {e}")
+        st.info("Displaying basic business impact instead...")
+        st.header("💼 Business Impact")
+        st.write("Business Impact page content would be displayed here.")
+
+def show_business_intelligence_page():
+    """Load and display the Business Intelligence page"""
+    try:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("business_intelligence", os.path.join(current_dir, "pages", "4_Business_Intelligence.py"))
+        bi_module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(bi_module)
+    except Exception as e:
+        st.error(f"Error loading Business Intelligence page: {e}")
+        st.info("Displaying basic business intelligence instead...")
+        st.header("🧠 Business Intelligence")
+        st.write("Business Intelligence page content would be displayed here.")
 
 if __name__ == "__main__":
     main()

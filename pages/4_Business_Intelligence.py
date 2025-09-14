@@ -12,7 +12,7 @@ sys.path.append(current_dir)
 
 from src.analytics import MarketingAnalytics
 
-st.set_page_config(page_title="Business Intelligence", page_icon="🧠", layout="wide")
+# st.set_page_config(page_title="Business Intelligence", page_icon="🧠", layout="wide")  # Commented out to avoid conflicts
 
 st.title("🧠 Business Intelligence & Strategic Insights")
 st.markdown("### Actionable Recommendations for Marketing Excellence")
