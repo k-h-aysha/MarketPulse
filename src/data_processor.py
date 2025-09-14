@@ -15,7 +15,7 @@ class MarketPulseDataProcessor:
         df_clean = df.copy()
         
         # Standardize column names (lowercase, remove spaces)
-        df_clean.columns = df_clean.columns.str.lower().str.replace(' ', '_')
+        df_clean.columns = df_clean.columns.str.lower().str.replace(' ', '_').str.replace('#_', '')
         
         # Handle date column - try common date column names
         date_cols = [col for col in df_clean.columns if 'date' in col.lower()]
@@ -27,18 +27,18 @@ class MarketPulseDataProcessor:
         # Add channel identifier
         df_clean['channel'] = channel_name
         
-        # Handle missing values in numeric columns
-        numeric_cols = ['impressions', 'impression', 'clicks', 'spend', 'attributed_revenue']
-        for col in numeric_cols:
-            if col in df_clean.columns:
-                df_clean[col] = pd.to_numeric(df_clean[col], errors='coerce').fillna(0)
-        
-        # Standardize column names
+        # Standardize column names to match expected format
         column_mapping = {
             'impression': 'impressions',
             'attributed_revenue': 'revenue'
         }
         df_clean = df_clean.rename(columns=column_mapping)
+        
+        # Handle missing values in numeric columns
+        numeric_cols = ['impressions', 'clicks', 'spend', 'revenue']
+        for col in numeric_cols:
+            if col in df_clean.columns:
+                df_clean[col] = pd.to_numeric(df_clean[col], errors='coerce').fillna(0)
         
         # Remove rows with invalid dates
         df_clean = df_clean.dropna(subset=['date'])
@@ -49,8 +49,8 @@ class MarketPulseDataProcessor:
         """Clean and standardize business data"""
         df_clean = df.copy()
         
-        # Standardize column names
-        df_clean.columns = df_clean.columns.str.lower().str.replace(' ', '_')
+        # Standardize column names (lowercase, remove spaces and # symbols)
+        df_clean.columns = df_clean.columns.str.lower().str.replace(' ', '_').str.replace('#_', '').str.replace('_of_', '_')
         
         # Handle date column
         date_cols = [col for col in df_clean.columns if 'date' in col.lower()]
@@ -58,6 +58,17 @@ class MarketPulseDataProcessor:
             date_col = date_cols[0]
             df_clean[date_col] = pd.to_datetime(df_clean[date_col], errors='coerce')
             df_clean = df_clean.rename(columns={date_col: 'date'})
+        
+        # Standardize column names to match expected format
+        column_mapping = {
+            'orders': 'orders',
+            'new_orders': 'new_orders',
+            'new_customers': 'new_customers',
+            'total_revenue': 'total_revenue',
+            'gross_profit': 'gross_profit',
+            'cogs': 'cogs'
+        }
+        df_clean = df_clean.rename(columns=column_mapping)
         
         # Handle missing values in numeric columns
         numeric_cols = ['orders', 'new_orders', 'new_customers', 'total_revenue', 'gross_profit', 'cogs']

@@ -65,12 +65,18 @@ class TablesDisplay:
             display_data,
             column_config={
                 "date": st.column_config.DateColumn("Date"),
+                "channel": "Channel",
                 "spend": st.column_config.NumberColumn("Spend", format="$%.0f"),
                 "revenue": st.column_config.NumberColumn("Revenue", format="$%.0f"),
                 "roas": st.column_config.NumberColumn("ROAS", format="%.2fx"),
                 "impressions": st.column_config.NumberColumn("Impressions", format="%.0f"),
                 "clicks": st.column_config.NumberColumn("Clicks", format="%.0f"),
-                "ctr": st.column_config.NumberColumn("CTR", format="%.2f%%")
+                "ctr": st.column_config.NumberColumn("CTR", format="%.2f%%"),
+                "orders": st.column_config.NumberColumn("Orders", format="%.0f"),
+                "new_orders": st.column_config.NumberColumn("New Orders", format="%.0f"),
+                "new_customers": st.column_config.NumberColumn("New Customers", format="%.0f"),
+                "total_revenue": st.column_config.NumberColumn("Total Revenue", format="$%.0f"),
+                "gross_profit": st.column_config.NumberColumn("Gross Profit", format="$%.0f")
             },
             use_container_width=True,
             hide_index=True
@@ -116,3 +122,56 @@ class TablesDisplay:
             use_container_width=True,
             hide_index=True
         )
+    
+    @staticmethod
+    def business_data_table(final_dataset, max_rows=30):
+        """Display business performance data"""
+        st.subheader("🏢 Business Performance Data")
+        
+        # Filter for Total channel only to avoid duplicates
+        business_data = final_dataset[final_dataset['channel'] == 'Total'].copy()
+        business_data = business_data.sort_values('date', ascending=False).head(max_rows)
+        
+        # Select relevant business columns
+        display_cols = ['date', 'orders', 'new_orders', 'new_customers', 'total_revenue', 'gross_profit', 'cogs']
+        display_data = business_data[display_cols]
+        
+        st.dataframe(
+            display_data,
+            column_config={
+                "date": st.column_config.DateColumn("Date"),
+                "orders": st.column_config.NumberColumn("Total Orders", format="%.0f"),
+                "new_orders": st.column_config.NumberColumn("New Orders", format="%.0f"),
+                "new_customers": st.column_config.NumberColumn("New Customers", format="%.0f"),
+                "total_revenue": st.column_config.NumberColumn("Total Revenue", format="$%.0f"),
+                "gross_profit": st.column_config.NumberColumn("Gross Profit", format="$%.0f"),
+                "cogs": st.column_config.NumberColumn("COGS", format="$%.0f")
+            },
+            use_container_width=True,
+            hide_index=True
+        )
+        
+        if len(business_data) > max_rows:
+            st.info(f"Showing latest {max_rows} days. Total days available: {len(business_data)}")
+    
+    @staticmethod
+    def raw_data_preview(raw_data, title="Raw Data Preview", max_rows=20):
+        """Display raw data preview"""
+        st.subheader(f"🔍 {title}")
+        
+        # Show sample of raw data
+        display_data = raw_data.head(max_rows)
+        
+        st.dataframe(
+            display_data,
+            use_container_width=True,
+            hide_index=True
+        )
+        
+        # Show data info
+        st.info(f"""
+        **Data Summary:**
+        - Total Rows: {len(raw_data):,}
+        - Columns: {len(raw_data.columns)}
+        - Date Range: {raw_data['date'].min().date() if 'date' in raw_data.columns else 'N/A'} to {raw_data['date'].max().date() if 'date' in raw_data.columns else 'N/A'}
+        """)
