@@ -201,7 +201,9 @@ def main():
     if 'current_page' not in st.session_state:
         st.session_state.current_page = 'Home'
     
-    # Sidebar with logo and navigation
+    # Mobile navigation will be handled by JavaScript
+    
+    # Sidebar with logo and navigation (hidden on mobile)
     with st.sidebar:
         # Custom CSS for sidebar styling and header removal
         st.markdown("""
@@ -211,29 +213,112 @@ def main():
             display: none !important;
         }
         
-        /* Hide sidebar close button and collapse elements - but allow mobile functionality */
+        /* Hide sidebar close button and collapse elements on desktop */
         [data-testid="stSidebarCollapseButton"],
-        [data-testid="stSidebarCloseButton"] {
-            display: none !important;
-        }
-        
-        /* Show close button on mobile devices */
-        @media (max-width: 768px) {
-            [data-testid="stSidebarCloseButton"] {
-                display: block !important;
-                position: absolute;
-                top: 10px;
-                right: 10px;
-                z-index: 999;
-                background: rgba(255, 255, 255, 0.9);
-                border-radius: 50%;
-                padding: 5px;
-            }
-        }
-        
+        [data-testid="stSidebarCloseButton"],
         .css-1544g2n,
         .st-emotion-cache-1544g2n {
             display: none !important;
+        }
+        
+        /* Mobile responsive sidebar */
+        @media (max-width: 768px) {
+            /* Allow sidebar to close properly on mobile */
+            [data-testid="stSidebarCollapseButton"],
+            [data-testid="stSidebarCloseButton"] {
+                display: block !important;
+            }
+        }
+        
+        /* Mobile navigation styles */
+        .mobile-nav-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: white;
+            z-index: 1001;
+            flex-direction: column;
+        }
+        
+        .mobile-nav-overlay.show {
+            display: flex;
+        }
+        
+        .mobile-nav-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: #3366FF;
+            color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .mobile-nav-logo {
+            font-size: 1.3rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+        }
+        
+        .mobile-nav-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        
+        .mobile-nav-close:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        
+        .mobile-nav-menu {
+            flex: 1;
+            padding: 0;
+            background: white;
+        }
+        
+        .mobile-nav-item {
+            display: block;
+            width: 100%;
+            padding: 1.2rem 1.5rem;
+            border: none;
+            background: white;
+            text-align: left;
+            font-size: 1.1rem;
+            border-bottom: 1px solid #e8e8e8;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #333;
+        }
+        
+        .mobile-nav-item:hover {
+            background: #f8f9fa;
+            color: #3366FF;
+        }
+        
+        .mobile-nav-item.active {
+            background: #3366FF;
+            color: white;
+            font-weight: 600;
+        }
+        
+        .mobile-nav-item:first-child {
+            border-top: 1px solid #e8e8e8;
+        }
+        
+        /* Adjust main content padding on mobile */
+        @media (max-width: 768px) {
+            .main .block-container {
+                padding-top: 80px !important;
+            }
         }
         
         /* Remove top padding from sidebar content */
@@ -397,54 +482,96 @@ def main():
                     }
                 });
                 
-                // Mobile sidebar auto-close functionality
-                if (window.innerWidth <= 768) {
-                    // Add click handler to navigation buttons to close sidebar on mobile
-                    const navButtons = document.querySelectorAll('[data-testid="stSidebar"] button');
-                    navButtons.forEach(btn => {
-                        btn.addEventListener('click', () => {
-                            setTimeout(() => {
-                                // Try to find and click the sidebar close button
-                                const closeBtn = document.querySelector('[data-testid="stSidebarCloseButton"]');
-                                if (closeBtn) {
-                                    closeBtn.click();
-                                }
-                                // Alternative: try to collapse sidebar
-                                const collapseBtn = document.querySelector('[data-testid="stSidebarCollapseButton"]');
-                                if (collapseBtn) {
-                                    collapseBtn.click();
-                                }
-                                // Force sidebar to close by manipulating CSS
-                                const sidebar = document.querySelector('[data-testid="stSidebar"]');
-                                if (sidebar && window.innerWidth <= 768) {
-                                    sidebar.style.transform = 'translateX(-100%)';
-                                    sidebar.style.transition = 'transform 0.3s ease';
-                                }
-                            }, 100);
+                // Enhanced mobile sidebar functionality
+                function setupMobileSidebar() {
+                    if (window.innerWidth <= 768) {
+                        // Force close button to be visible and functional
+                        const closeBtn = document.querySelector('[data-testid="stSidebarCloseButton"]');
+                        if (closeBtn) {
+                            closeBtn.style.display = 'block !important';
+                            closeBtn.style.visibility = 'visible !important';
+                            closeBtn.style.opacity = '1 !important';
+                            closeBtn.style.pointerEvents = 'auto !important';
+                        }
+                        
+                        // Add click handlers to navigation buttons for auto-close
+                        const navButtons = document.querySelectorAll('[data-testid="stSidebar"] button');
+                        navButtons.forEach((btn, index) => {
+                            // Remove existing listeners to prevent duplicates
+                            btn.replaceWith(btn.cloneNode(true));
                         });
-                    });
+                        
+                        // Re-select buttons after cloning and add new listeners
+                        const freshNavButtons = document.querySelectorAll('[data-testid="stSidebar"] button');
+                        freshNavButtons.forEach(btn => {
+                            btn.addEventListener('click', (e) => {
+                                // Allow the original click to process first
+                                setTimeout(() => {
+                                    // Try multiple methods to close sidebar
+                                    const closeBtn = document.querySelector('[data-testid="stSidebarCloseButton"]');
+                                    const collapseBtn = document.querySelector('[data-testid="stSidebarCollapseButton"]');
+                                    
+                                    if (closeBtn && closeBtn.offsetParent !== null) {
+                                        closeBtn.click();
+                                    } else if (collapseBtn && collapseBtn.offsetParent !== null) {
+                                        collapseBtn.click();
+                                    } else {
+                                        // Force close by manipulating the sidebar state
+                                        const sidebar = document.querySelector('[data-testid="stSidebar"]');
+                                        if (sidebar) {
+                                            sidebar.style.transform = 'translateX(-100%)';
+                                            sidebar.style.transition = 'transform 0.3s ease';
+                                        }
+                                    }
+                                }, 200);
+                            });
+                        });
+                        
+                        // Ensure close button functionality
+                        const closeBtnFinal = document.querySelector('[data-testid="stSidebarCloseButton"]');
+                        if (closeBtnFinal) {
+                            closeBtnFinal.addEventListener('click', () => {
+                                const sidebar = document.querySelector('[data-testid="stSidebar"]');
+                                if (sidebar) {
+                                    sidebar.style.display = 'none';
+                                }
+                            });
+                        }
+                    }
                 }
+                
+                setupMobileSidebar();
                 
                 // Force scroll to top
                 document.documentElement.scrollTop = 0;
                 document.body.scrollTop = 0;
                 window.pageYOffset = 0;
                 
-                // Ensure mobile sidebar behavior
-                if (window.innerWidth <= 768) {
-                    // Re-enable close button on mobile
-                    const closeBtn = document.querySelector('[data-testid="stSidebarCloseButton"]');
-                    if (closeBtn) {
-                        closeBtn.style.display = 'block';
-                        closeBtn.style.position = 'absolute';
-                        closeBtn.style.top = '10px';
-                        closeBtn.style.right = '10px';
-                        closeBtn.style.zIndex = '999';
-                        closeBtn.style.background = 'rgba(255, 255, 255, 0.9)';
-                        closeBtn.style.borderRadius = '50%';
-                        closeBtn.style.padding = '5px';
+                // Multiple attempts to ensure mobile functionality
+                setTimeout(() => setupMobileSidebar(), 300);
+                setTimeout(() => setupMobileSidebar(), 800);
+                setTimeout(() => setupMobileSidebar(), 1500);
+                
+                // Handle dynamic content changes
+                const observer = new MutationObserver(() => {
+                    if (window.innerWidth <= 768) {
+                        setupMobileSidebar();
                     }
+                });
+                
+                const sidebarContainer = document.querySelector('[data-testid="stSidebar"]');
+                if (sidebarContainer) {
+                    observer.observe(sidebarContainer, {
+                        childList: true,
+                        subtree: true,
+                        attributes: true
+                    });
                 }
+                
+                // Handle window resize
+                window.addEventListener('resize', () => {
+                    setupMobileSidebar();
+                });
             }, 200);
         }, 100);
         </script>
