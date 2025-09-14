@@ -211,9 +211,26 @@ def main():
             display: none !important;
         }
         
-        /* Hide sidebar close button and collapse elements */
+        /* Hide sidebar close button and collapse elements - but allow mobile functionality */
         [data-testid="stSidebarCollapseButton"],
-        [data-testid="stSidebarCloseButton"],
+        [data-testid="stSidebarCloseButton"] {
+            display: none !important;
+        }
+        
+        /* Show close button on mobile devices */
+        @media (max-width: 768px) {
+            [data-testid="stSidebarCloseButton"] {
+                display: block !important;
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                z-index: 999;
+                background: rgba(255, 255, 255, 0.9);
+                border-radius: 50%;
+                padding: 5px;
+            }
+        }
+        
         .css-1544g2n,
         .st-emotion-cache-1544g2n {
             display: none !important;
@@ -380,10 +397,54 @@ def main():
                     }
                 });
                 
+                // Mobile sidebar auto-close functionality
+                if (window.innerWidth <= 768) {
+                    // Add click handler to navigation buttons to close sidebar on mobile
+                    const navButtons = document.querySelectorAll('[data-testid="stSidebar"] button');
+                    navButtons.forEach(btn => {
+                        btn.addEventListener('click', () => {
+                            setTimeout(() => {
+                                // Try to find and click the sidebar close button
+                                const closeBtn = document.querySelector('[data-testid="stSidebarCloseButton"]');
+                                if (closeBtn) {
+                                    closeBtn.click();
+                                }
+                                // Alternative: try to collapse sidebar
+                                const collapseBtn = document.querySelector('[data-testid="stSidebarCollapseButton"]');
+                                if (collapseBtn) {
+                                    collapseBtn.click();
+                                }
+                                // Force sidebar to close by manipulating CSS
+                                const sidebar = document.querySelector('[data-testid="stSidebar"]');
+                                if (sidebar && window.innerWidth <= 768) {
+                                    sidebar.style.transform = 'translateX(-100%)';
+                                    sidebar.style.transition = 'transform 0.3s ease';
+                                }
+                            }, 100);
+                        });
+                    });
+                }
+                
                 // Force scroll to top
                 document.documentElement.scrollTop = 0;
                 document.body.scrollTop = 0;
                 window.pageYOffset = 0;
+                
+                // Ensure mobile sidebar behavior
+                if (window.innerWidth <= 768) {
+                    // Re-enable close button on mobile
+                    const closeBtn = document.querySelector('[data-testid="stSidebarCloseButton"]');
+                    if (closeBtn) {
+                        closeBtn.style.display = 'block';
+                        closeBtn.style.position = 'absolute';
+                        closeBtn.style.top = '10px';
+                        closeBtn.style.right = '10px';
+                        closeBtn.style.zIndex = '999';
+                        closeBtn.style.background = 'rgba(255, 255, 255, 0.9)';
+                        closeBtn.style.borderRadius = '50%';
+                        closeBtn.style.padding = '5px';
+                    }
+                }
             }, 200);
         }, 100);
         </script>
