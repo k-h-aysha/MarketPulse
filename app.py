@@ -201,7 +201,7 @@ def main():
     if 'current_page' not in st.session_state:
         st.session_state.current_page = 'Home'
     
-    # Mobile navigation will be handled by JavaScript
+    # Mobile navigation and hamburger menu handled by JavaScript
     
     # Sidebar with logo and navigation (hidden on mobile)
     with st.sidebar:
@@ -221,12 +221,89 @@ def main():
             display: none !important;
         }
         
-        /* Mobile responsive sidebar */
+        /* Mobile sidebar behavior - use Streamlit's native collapse */
         @media (max-width: 768px) {
-            /* Allow sidebar to close properly on mobile */
-            [data-testid="stSidebarCollapseButton"],
-            [data-testid="stSidebarCloseButton"] {
-                display: block !important;
+            /* Hide sidebar by default on mobile */
+            [data-testid="stSidebar"] {
+                transform: translateX(-100%) !important;
+                transition: transform 0.3s ease !important;
+                visibility: hidden !important;
+                opacity: 0 !important;
+            }
+            
+            /* Show sidebar when expanded using aria-expanded */
+            [data-testid="stSidebar"][aria-expanded="true"] {
+                transform: translateX(0) !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+            }
+            
+            /* Style the hamburger menu button */
+            [data-testid="stSidebarNav"] button,
+            [kind="header"][data-testid="baseButton-header"] {
+                position: fixed !important;
+                top: 1rem !important;
+                left: 1rem !important;
+                z-index: 1000 !important;
+                background: #3366FF !important;
+                color: white !important;
+                border: none !important;
+                border-radius: 8px !important;
+                padding: 12px !important;
+                font-size: 18px !important;
+                cursor: pointer !important;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
+                transition: all 0.3s ease !important;
+                width: auto !important;
+                height: auto !important;
+            }
+            
+            [data-testid="stSidebarNav"] button:hover,
+            [kind="header"][data-testid="baseButton-header"]:hover {
+                background: #2952CC !important;
+                transform: scale(1.05) !important;
+            }
+            
+            /* When sidebar is collapsed, show hamburger button at fixed position */
+            [data-testid="stSidebar"][aria-expanded="false"] [kind="header"][data-testid="baseButton-header"],
+            [data-testid="stSidebar"]:not([aria-expanded="true"]) [kind="header"][data-testid="baseButton-header"] {
+                position: fixed !important;
+                top: 1rem !important;
+                left: 1rem !important;
+                transform: none !important;
+                z-index: 1000 !important;
+                background: #3366FF !important;
+                color: white !important;
+                border: none !important;
+                border-radius: 8px !important;
+                padding: 12px !important;
+                font-size: 18px !important;
+                cursor: pointer !important;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
+                transition: all 0.3s ease !important;
+                width: auto !important;
+                height: auto !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+            }
+            
+            /* When sidebar is expanded, show close button inside sidebar */
+            [data-testid="stSidebar"][aria-expanded="true"] [kind="header"][data-testid="baseButton-header"] {
+                position: absolute !important;
+                top: 10px !important;
+                right: 10px !important;
+                left: auto !important;
+                transform: none !important;
+                z-index: 1001 !important;
+                background: rgba(255,255,255,0.9) !important;
+                color: #333 !important;
+                border-radius: 50% !important;
+                padding: 8px !important;
+                width: 40px !important;
+                height: 40px !important;
+                font-size: 16px !important;
+                visibility: visible !important;
+                opacity: 1 !important;
             }
         }
         
@@ -482,61 +559,79 @@ def main():
                     }
                 });
                 
-                // Enhanced mobile sidebar functionality
+                // Simple mobile sidebar functionality using Streamlit's native behavior
                 function setupMobileSidebar() {
                     if (window.innerWidth <= 768) {
-                        // Force close button to be visible and functional
-                        const closeBtn = document.querySelector('[data-testid="stSidebarCloseButton"]');
-                        if (closeBtn) {
-                            closeBtn.style.display = 'block !important';
-                            closeBtn.style.visibility = 'visible !important';
-                            closeBtn.style.opacity = '1 !important';
-                            closeBtn.style.pointerEvents = 'auto !important';
+                        const sidebar = document.querySelector('[data-testid="stSidebar"]');
+                        
+                        // Initially collapse sidebar on mobile
+                        if (sidebar) {
+                            sidebar.setAttribute('aria-expanded', 'false');
                         }
                         
-                        // Add click handlers to navigation buttons for auto-close
-                        const navButtons = document.querySelectorAll('[data-testid="stSidebar"] button');
-                        navButtons.forEach((btn, index) => {
-                            // Remove existing listeners to prevent duplicates
-                            btn.replaceWith(btn.cloneNode(true));
-                        });
+                        // Find the hamburger/close button
+                        const toggleBtn = document.querySelector('[kind="header"][data-testid="baseButton-header"]');
                         
-                        // Re-select buttons after cloning and add new listeners
-                        const freshNavButtons = document.querySelectorAll('[data-testid="stSidebar"] button');
-                        freshNavButtons.forEach(btn => {
-                            btn.addEventListener('click', (e) => {
-                                // Allow the original click to process first
+                        if (toggleBtn && sidebar) {
+                            // Update button content based on sidebar state
+                            const updateButton = () => {
+                                const isExpanded = sidebar.getAttribute('aria-expanded') === 'true';
+                                if (isExpanded) {
+                                    toggleBtn.innerHTML = '✕';
+                                    toggleBtn.title = 'Close Navigation';
+                                } else {
+                                    toggleBtn.innerHTML = '☰';
+                                    toggleBtn.title = 'Open Navigation';
+                                }
+                            };
+                            
+                            updateButton();
+                            
+                            // Remove existing listeners
+                            toggleBtn.replaceWith(toggleBtn.cloneNode(true));
+                            const newToggleBtn = document.querySelector('[kind="header"][data-testid="baseButton-header"]');
+                            
+                            if (newToggleBtn) {
+                                newToggleBtn.addEventListener('click', function(e) {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    if (sidebar) {
+                                        const isExpanded = sidebar.getAttribute('aria-expanded') === 'true';
+                                        sidebar.setAttribute('aria-expanded', (!isExpanded).toString());
+                                        
+                                        // Update button after state change
+                                        setTimeout(() => {
+                                            const newIsExpanded = sidebar.getAttribute('aria-expanded') === 'true';
+                                            if (newIsExpanded) {
+                                                newToggleBtn.innerHTML = '✕';
+                                                newToggleBtn.title = 'Close Navigation';
+                                            } else {
+                                                newToggleBtn.innerHTML = '☰';
+                                                newToggleBtn.title = 'Open Navigation';
+                                            }
+                                        }, 50);
+                                    }
+                                });
+                            }
+                        }
+                        
+                        // Auto-close on navigation
+                        const navButtons = document.querySelectorAll('[data-testid="stSidebar"] .stButton button');
+                        navButtons.forEach(btn => {
+                            btn.addEventListener('click', () => {
                                 setTimeout(() => {
-                                    // Try multiple methods to close sidebar
-                                    const closeBtn = document.querySelector('[data-testid="stSidebarCloseButton"]');
-                                    const collapseBtn = document.querySelector('[data-testid="stSidebarCollapseButton"]');
-                                    
-                                    if (closeBtn && closeBtn.offsetParent !== null) {
-                                        closeBtn.click();
-                                    } else if (collapseBtn && collapseBtn.offsetParent !== null) {
-                                        collapseBtn.click();
-                                    } else {
-                                        // Force close by manipulating the sidebar state
-                                        const sidebar = document.querySelector('[data-testid="stSidebar"]');
-                                        if (sidebar) {
-                                            sidebar.style.transform = 'translateX(-100%)';
-                                            sidebar.style.transition = 'transform 0.3s ease';
+                                    if (sidebar) {
+                                        sidebar.setAttribute('aria-expanded', 'false');
+                                        // Update button icon
+                                        const toggleBtn = document.querySelector('[kind="header"][data-testid="baseButton-header"]');
+                                        if (toggleBtn) {
+                                            toggleBtn.innerHTML = '☰';
+                                            toggleBtn.title = 'Open Navigation';
                                         }
                                     }
                                 }, 200);
                             });
                         });
-                        
-                        // Ensure close button functionality
-                        const closeBtnFinal = document.querySelector('[data-testid="stSidebarCloseButton"]');
-                        if (closeBtnFinal) {
-                            closeBtnFinal.addEventListener('click', () => {
-                                const sidebar = document.querySelector('[data-testid="stSidebar"]');
-                                if (sidebar) {
-                                    sidebar.style.display = 'none';
-                                }
-                            });
-                        }
                     }
                 }
                 
@@ -547,32 +642,54 @@ def main():
                 document.body.scrollTop = 0;
                 window.pageYOffset = 0;
                 
-                // Multiple attempts to ensure mobile functionality
-                setTimeout(() => setupMobileSidebar(), 300);
-                setTimeout(() => setupMobileSidebar(), 800);
-                setTimeout(() => setupMobileSidebar(), 1500);
-                
-                // Handle dynamic content changes
-                const observer = new MutationObserver(() => {
-                    if (window.innerWidth <= 768) {
-                        setupMobileSidebar();
-                    }
-                });
-                
-                const sidebarContainer = document.querySelector('[data-testid="stSidebar"]');
-                if (sidebarContainer) {
-                    observer.observe(sidebarContainer, {
-                        childList: true,
-                        subtree: true,
-                        attributes: true
-                    });
-                }
+                // Retry setup multiple times to ensure it works
+                setTimeout(() => setupMobileSidebar(), 500);
+                setTimeout(() => setupMobileSidebar(), 1000);
+                setTimeout(() => setupMobileSidebar(), 2000);
                 
                 // Handle window resize
                 window.addEventListener('resize', () => {
-                    setupMobileSidebar();
+                    if (window.innerWidth <= 768) {
+                        setupMobileSidebar();
+                    } else {
+                        // Reset to desktop behavior
+                        const sidebar = document.querySelector('[data-testid="stSidebar"]');
+                        if (sidebar) {
+                            sidebar.removeAttribute('aria-expanded');
+                        }
+                    }
                 });
-            }, 200);
+                
+                // Watch for sidebar changes and aria-expanded attribute changes
+                const observer = new MutationObserver((mutations) => {
+                    if (window.innerWidth <= 768) {
+                        mutations.forEach(mutation => {
+                            if (mutation.type === 'attributes' && mutation.attributeName === 'aria-expanded') {
+                                // Update button icon when aria-expanded changes
+                                const sidebar = mutation.target;
+                                const toggleBtn = document.querySelector('[kind="header"][data-testid="baseButton-header"]');
+                                if (toggleBtn && sidebar) {
+                                    const isExpanded = sidebar.getAttribute('aria-expanded') === 'true';
+                                    if (isExpanded) {
+                                        toggleBtn.innerHTML = '✕';
+                                        toggleBtn.title = 'Close Navigation';
+                                    } else {
+                                        toggleBtn.innerHTML = '☰';
+                                        toggleBtn.title = 'Open Navigation';
+                                    }
+                                }
+                            }
+                        });
+                    }
+                });
+                
+                const targetNode = document.querySelector('[data-testid="stSidebar"]');
+                if (targetNode) {
+                    observer.observe(targetNode, { 
+                        attributes: true, 
+                        attributeFilter: ['aria-expanded'] 
+                    });
+                }      }, 200);
         }, 100);
         </script>
         """, unsafe_allow_html=True)
